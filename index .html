@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Image ⇄ JSON Converter</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+body{
+    background:#181818;
+    color:#fff;
+    padding:30px;
+}
+
+.container{
+    max-width:1200px;
+    margin:auto;
+}
+
+h1{
+    text-align:center;
+    margin-bottom:25px;
+}
+
+.buttons{
+    background:#222;
+    border-radius:10px;
+    padding:20px;
+    margin-bottom:25px;
+}
+
+.buttons input{
+    width:100%;
+    margin-bottom:15px;
+}
+
+button{
+    width:100%;
+    padding:14px;
+    margin-bottom:12px;
+    border:none;
+    border-radius:8px;
+    background:#2196F3;
+    color:white;
+    font-size:16px;
+    cursor:pointer;
+    transition:.25s;
+}
+
+button:hover{
+    background:#1976D2;
+}
+
+button:disabled{
+    background:#666;
+    cursor:not-allowed;
+}
+
+hr{
+    margin:18px 0;
+    border:1px solid #444;
+}
+
+.preview{
+    display:flex;
+    gap:25px;
+    flex-wrap:wrap;
+}
+
+.preview div{
+    flex:1;
+    min-width:320px;
+}
+
+.preview h2{
+    margin-bottom:12px;
+    text-align:center;
+}
+
+canvas{
+    width:100%;
+    background:#fff;
+    border:2px solid #444;
+    border-radius:8px;
+    image-rendering:pixelated;
+}
+
+#status{
+    margin-top:20px;
+    background:#222;
+    padding:15px;
+    border-radius:8px;
+    text-align:center;
+    font-weight:bold;
+    color:#7CFC00;
+    word-break:break-word;
+}
+
+@media(max-width:768px){
+
+.preview{
+    flex-direction:column;
+}
+
+body{
+    padding:15px;
+}
+
+button{
+    font-size:15px;
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Image ⇄ JSON Converter</h1>
+
+<div class="buttons">
+
+<input
+type="file"
+id="imageInput"
+accept="image/png,image/jpeg,image/webp">
+
+<button id="imageToJson">
+Image → JSON
+</button>
+
+<button id="downloadJson">
+Download JSON
+</button>
+
+<hr>
+
+<input
+type="file"
+id="jsonInput"
+accept=".json">
+
+<button id="jsonToImage">
+JSON → Image
+</button>
+
+<button id="downloadPNG">
+Download PNG
+</button>
+
+</div>
+
+<div class="preview">
+
+<div>
+
+<h2>Original</h2>
+
+<canvas id="originalCanvas"></canvas>
+
+</div>
+
+<div>
+
+<h2>Reconstructed</h2>
+
+<canvas id="resultCanvas"></canvas>
+
+</div>
+
+</div>
+
+<div id="status">
+Ready...
+</div>
+
+</div>
+
+<script>
+
+/* Paste JavaScript here */
+// ===========================
+// VARIABLES
+// ===========================
+
+const imageInput = document.getElementById("imageInput");
+const jsonInput = document.getElementById("jsonInput");
+
+const imageToJsonBtn = document.getElementById("imageToJson");
+const jsonToImageBtn = document.getElementById("jsonToImage");
+
+const downloadJsonBtn = document.getElementById("downloadJson");
+const downloadPNGBtn = document.getElementById("downloadPNG");
+
+const originalCanvas = document.getElementById("originalCanvas");
+const resultCanvas = document.getElementById("resultCanvas");
+
+const originalCtx = originalCanvas.getContext("2d");
+const resultCtx = resultCanvas.getContext("2d");
+
+const statusBox = document.getElementById("status");
+
+let imageJSON = null;
+let imageLoaded = false;
+
+
+// ===========================
+// STATUS
+// ===========================
+
+function setStatus(text,color="#7CFC00"){
+
+    statusBox.innerText=text;
+    statusBox.style.color=color;
+
+}
+
+
+// ===========================
+// IMAGE UPLOAD
+// ===========================
+
+imageInput.addEventListener("change",function(){
+
+    const file=this.files[0];
+
+    if(!file){
+
+        return;
+
+    }
+
+    const img=new Image();
+
+    img.onload=function(){
+
+        originalCanvas.width=img.width;
+        originalCanvas.height=img.height;
+
+        resultCanvas.width=img.width;
+        resultCanvas.height=img.height;
+
+        originalCtx.clearRect(0,0,img.width,img.height);
+
+        originalCtx.drawImage(img,0,0);
+
+        imageLoaded=true;
+
+        setStatus(
+            "Image Loaded : "
+            +img.width+
+            " × "
+            +img.height
+        );
+
+    };
+
+    img.src=URL.createObjectURL(file);
+
+});
+
+
+// ===========================
+// PLACEHOLDER
+// (Next Parts Will Continue)
+// ===========================
+
+downloadJsonBtn.disabled=false;
+downloadPNGBtn.disabled=false;
+  
+  // ===========================
+// IMAGE -> JSON
+// ===========================
+
+imageToJsonBtn.addEventListener("click", function () {
+
+    if (!imageLoaded) {
+        setStatus("Please select an image first.", "#ff5555");
+        return;
+    }
+
+    const width = originalCanvas.width;
+    const height = originalCanvas.height;
+
+    const imgData = originalCtx.getImageData(0, 0, width, height);
+
+    imageJSON = {
+        width: width,
+        height: height,
+        pixels: Array.from(imgData.data)
+    };
+
+    setStatus(
+        "JSON Created Successfully\n" +
+        "Pixels : " + (imageJSON.pixels.length / 4)
+    );
+
+});
+
+// ===========================
+// DOWNLOAD JSON
+// ===========================
+
+downloadJsonBtn.addEventListener("click", function () {
+
+    if (!imageJSON) {
+        setStatus("Generate JSON first.", "#ff5555");
+        return;
+    }
+
+    const jsonString = JSON.stringify(imageJSON);
+
+    const blob = new Blob(
+        [jsonString],
+        { type: "application/json" }
+    );
+
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+
+    a.href = url;
+    a.download = "image.json";
+
+    document.body.appendChild(a);
+
+    a.click();
+
+    document.body.removeChild(a);
+
+    URL.revokeObjectURL(url);
+
+    setStatus("JSON Downloaded Successfully");
+
+});
+ // ===========================
+// JSON -> IMAGE
+// ===========================
+
+jsonToImageBtn.addEventListener("click", function () {
+
+    const file = jsonInput.files[0];
+
+    if (!file) {
+        setStatus("Please select a JSON file.", "#ff5555");
+        return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = function (e) {
+
+        try {
+
+            imageJSON = JSON.parse(e.target.result);
+
+            if (
+                !imageJSON.width ||
+                !imageJSON.height ||
+                !imageJSON.pixels
+            ) {
+                throw new Error("Invalid JSON");
+            }
+
+            resultCanvas.width = imageJSON.width;
+            resultCanvas.height = imageJSON.height;
+
+            const imgData = resultCtx.createImageData(
+                imageJSON.width,
+                imageJSON.height
+            );
+
+            imgData.data.set(
+                new Uint8ClampedArray(imageJSON.pixels)
+            );
+
+            resultCtx.putImageData(imgData, 0, 0);
+
+            setStatus(
+                "Image Reconstructed Successfully\n" +
+                imageJSON.width +
+                " × " +
+                imageJSON.height
+            );
+
+        } catch (err) {
+
+            setStatus("Invalid JSON File!", "#ff5555");
+            console.error(err);
+
+        }
+
+    };
+
+    reader.readAsText(file);
+
+});
+
+  // ===========================
+// EXTRA FEATURES
+// ===========================
+
+// Progress Bar
+const progress = document.createElement("progress");
+progress.max = 100;
+progress.value = 0;
+progress.style.width = "100%";
+progress.style.marginTop = "15px";
+document.querySelector(".container").appendChild(progress);
+
+// File Info
+const info = document.createElement("div");
+info.style.marginTop = "15px";
+info.style.padding = "10px";
+info.style.background = "#222";
+info.style.borderRadius = "8px";
+info.innerHTML = "No file loaded";
+document.querySelector(".container").appendChild(info);
+
+
+// Update Info
+function updateInfo(canvas){
+
+    const w = canvas.width;
+    const h = canvas.height;
+
+    let pixels = w*h;
+
+    info.innerHTML=
+    "<b>Resolution:</b> "+w+" × "+h+
+    "<br><b>Total Pixels:</b> "+pixels+
+    "<br><b>RGBA Bytes:</b> "+pixels*4;
+
+}
+
+
+// ===========================
+// Drag Drop
+// ===========================
+
+document.body.addEventListener("dragover",e=>{
+    e.preventDefault();
+});
+
+document.body.addEventListener("drop",e=>{
+
+    e.preventDefault();
+
+    const file=e.dataTransfer.files[0];
+
+    if(!file)return;
+
+    if(file.type.startsWith("image")){
+
+        imageInput.files=e.dataTransfer.files;
+        imageInput.dispatchEvent(new Event("change"));
+
+    }
+
+    else if(file.name.endsWith(".json")){
+
+        jsonInput.files=e.dataTransfer.files;
+
+    }
+
+});
+
+
+// ===========================
+// Compare Images
+// ===========================
+
+function compareImages(){
+
+    if(
+        originalCanvas.width!=resultCanvas.width ||
+        originalCanvas.height!=resultCanvas.height
+    ){
+
+        setStatus("Images have different sizes","#ff5555");
+        return;
+
+    }
+
+    const a=originalCtx.getImageData(
+        0,0,
+        originalCanvas.width,
+        originalCanvas.height
+    ).data;
+
+    const b=resultCtx.getImageData(
+        0,0,
+        resultCanvas.width,
+        resultCanvas.height
+    ).data;
+
+    let diff=0;
+
+    for(let i=0;i<a.length;i++){
+
+        if(a[i]!=b[i])diff++;
+
+    }
+
+    if(diff==0){
+
+        setStatus("Perfect Match ✔");
+
+    }else{
+
+        setStatus(
+            "Different Bytes : "+diff,
+            "#ffaa00"
+        );
+
+    }
+
+}
+
+
+// ===========================
+// JSON Compression
+// ===========================
+
+function exportCompressedJSON(){
+
+    const w=originalCanvas.width;
+    const h=originalCanvas.height;
+
+    const pixels=originalCtx.getImageData(
+        0,0,w,h
+    ).data;
+
+    let binary="";
+
+    for(let i=0;i<pixels.length;i++){
+
+        binary+=String.fromCharCode(pixels[i]);
+
+        progress.value=(i/pixels.length)*100;
+
+    }
+
+    const compressed={
+
+        width:w,
+        height:h,
+        base64:btoa(binary)
+
+    };
+
+    const blob=new Blob(
+        [
+            JSON.stringify(compressed)
+        ],
+        {
+            type:"application/json"
+        }
+    );
+
+    const a=document.createElement("a");
+
+    a.href=URL.createObjectURL(blob);
+
+    a.download="compressed.json";
+
+    a.click();
+
+    progress.value=100;
+
+    setStatus("Compressed JSON Saved");
+
+}
+
+
+// ===========================
+// Double Click Canvas
+// ===========================
+
+resultCanvas.addEventListener("dblclick",compareImages);
+
+originalCanvas.addEventListener("dblclick",function(){
+
+    updateInfo(originalCanvas);
+
+});
+
+setStatus("Ready");
+
+  
+ reader.onload = function(e){
+
+    try{
+
+        imageJSON = JSON.parse(e.target.result);
+
+        let width = imageJSON.width;
+        let height = imageJSON.height;
+
+        resultCanvas.width = width;
+        resultCanvas.height = height;
+
+        let imgData = resultCtx.createImageData(width,height);
+
+        // Normal JSON
+        if(imageJSON.pixels){
+
+            imgData.data.set(
+                new Uint8ClampedArray(imageJSON.pixels)
+            );
+
+            resultCtx.putImageData(imgData,0,0);
+
+            setStatus("Normal JSON Loaded");
+
+        }
+
+        // Compressed JSON
+        else if(imageJSON.base64){
+
+            let binary = atob(imageJSON.base64);
+
+            let pixels = new Uint8ClampedArray(binary.length);
+
+            for(let i=0;i<binary.length;i++){
+
+                pixels[i]=binary.charCodeAt(i);
+
+                if(i%50000==0){
+
+                    progress.value=
+                    (i/binary.length)*100;
+
+                }
+
+            }
+
+            imgData.data.set(pixels);
+
+            resultCtx.putImageData(imgData,0,0);
+
+            progress.value=100;
+
+            setStatus("Compressed JSON Loaded");
+
+        }
+
+        else{
+
+            throw "Unknown JSON Format";
+
+        }
+
+        updateInfo(resultCanvas);
+
+    }
+
+    catch(err){
+
+        console.error(err);
+
+        setStatus(
+            "Invalid JSON File",
+            "#ff4444"
+        );
+
+    }
+
+};
+
+reader.readAsText(file);
+  
+// ===========================
+// DOWNLOAD PNG
+// ===========================
+
+downloadPNGBtn.addEventListener("click", function () {
+
+    if (resultCanvas.width === 0) {
+
+        setStatus("No reconstructed image found.", "#ff5555");
+        return;
+
+    }
+
+    resultCanvas.toBlob(function(blob){
+
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+
+        a.href = url;
+        a.download = "reconstructed.png";
+
+        document.body.appendChild(a);
+
+        a.click();
+
+        document.body.removeChild(a);
+
+        URL.revokeObjectURL(url);
+
+        setStatus("PNG Downloaded Successfully");
+
+    }, "image/png");
+
+});
+</script>
+
+</body>
+</html>
