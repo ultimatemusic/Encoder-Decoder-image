@@ -2,284 +2,565 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Pixel ⇄ JSON Converter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-}
-
-:root{
-    --bg1:#4f46e5;
-    --bg2:#7c3aed;
-    --card:rgba(255,255,255,.12);
-    --border:rgba(255,255,255,.18);
-    --text:#fff;
-    --sub:#d7d7d7;
-    --btn1:#06b6d4;
-    --btn2:#2563eb;
-    --success:#22c55e;
-}
-
-body{
+  :root{
+    --ink:#1B1730;
+    --sub:#8B87A0;
+    --lav-bg:#F4F0FC;
+    --lav-100:#EEE7FB;
+    --lav-200:#E3D9F7;
+    --purple:#7B61FF;
+    --purple-dark:#5B3FE0;
+    --purple-deep:#241852;
+    --white:#FFFFFF;
+    --line:#EDE9F6;
+    --success:#22C55E;
+    --success-bg:#E9FBF0;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{
+    overflow-x:hidden;
+    width:100%;
+  }
+  body{
     min-height:100vh;
+    width:100%;
+    font-family:'Inter',sans-serif;
+    color:var(--ink);
     display:flex;
     justify-content:center;
-    align-items:center;
-    padding:30px;
-    font-family:Inter,"Segoe UI",sans-serif;
+    align-items:flex-start;
+    padding:60px 20px;
     background:
-    radial-gradient(circle at top left,#8b5cf6,transparent 45%),
-    radial-gradient(circle at bottom right,#06b6d4,transparent 45%),
-    linear-gradient(135deg,#1e1b4b,#312e81,#0f172a);
-    color:var(--text);
-}
+      radial-gradient(circle at 12% 8%, #EFE7FE 0%, transparent 42%),
+      radial-gradient(circle at 88% 92%, #E5DBFB 0%, transparent 38%),
+      #F8F6FD;
+    position:relative;
+    overflow-x:hidden;
+  }
 
-.card{
+  /* ambient floating blobs */
+  .blob{
+    position:absolute;
+    border-radius:50%;
+    filter:blur(0px);
+    opacity:.5;
+    z-index:0;
+    animation:drift 14s ease-in-out infinite;
+    pointer-events:none;
+  }
+  .blob-a{width:220px;height:220px;background:var(--lav-200);top:-60px;left:-10px;animation-delay:0s;}
+  .blob-b{width:160px;height:160px;background:var(--purple);opacity:.10;bottom:-40px;right:2%;animation-delay:-4s;}
+  .blob-c{width:110px;height:110px;background:var(--lav-200);opacity:.6;top:38%;right:2%;animation-delay:-8s;}
+  @keyframes drift{
+    0%,100%{transform:translate(0,0) scale(1);}
+    50%{transform:translate(14px,-18px) scale(1.06);}
+  }
+
+  .wrap{
+    position:relative;
+    z-index:1;
     width:100%;
-    max-width:900px;
-    backdrop-filter:blur(22px);
-    background:var(--card);
-    border:1px solid var(--border);
-    border-radius:28px;
-    padding:35px;
-    box-shadow:
-        0 25px 60px rgba(0,0,0,.35),
-        inset 0 1px rgba(255,255,255,.15);
-}
+    max-width:640px;
+    opacity:0;
+    transform:translateY(18px);
+    animation:riseIn .7s cubic-bezier(.16,1,.3,1) forwards;
+  }
+  @keyframes riseIn{ to{opacity:1; transform:translateY(0);} }
 
-h1{
-    text-align:center;
-    font-size:34px;
+  .eyebrow{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-family:'Sora',sans-serif;
+    font-size:12px;
+    font-weight:600;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--purple-dark);
+    background:var(--lav-100);
+    padding:7px 16px;
+    border-radius:100px;
+    margin-bottom:18px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:6px;height:6px;border-radius:50%;
+    background:var(--purple);
+    display:inline-block;
+    animation:pulse 1.8s ease-in-out infinite;
+  }
+  @keyframes pulse{
+    0%,100%{transform:scale(1); opacity:1;}
+    50%{transform:scale(1.5); opacity:.5;}
+  }
+
+  h1{
+    font-family:'Sora',sans-serif;
+    font-size:32px;
     font-weight:700;
+    letter-spacing:-0.01em;
     margin-bottom:10px;
-}
-
-.sub{
-    text-align:center;
+  }
+  h1 span{color:var(--purple);}
+  .sub{
     color:var(--sub);
-    margin-bottom:35px;
-    font-size:15px;
+    font-size:14.5px;
     line-height:1.6;
-}
+    margin-bottom:34px;
+    max-width:460px;
+  }
 
-.section{
-    background:rgba(255,255,255,.08);
-    border:1px solid rgba(255,255,255,.12);
-    border-radius:20px;
-    padding:25px;
-    margin-bottom:25px;
-    transition:.35s;
-}
+  .section{
+    background:var(--white);
+    border:1px solid var(--line);
+    border-radius:22px;
+    padding:28px;
+    margin-bottom:22px;
+    position:relative;
+    box-shadow:0 18px 40px -22px rgba(36,24,82,.18);
+    transition:transform .35s cubic-bezier(.16,1,.3,1), box-shadow .35s ease, border-color .35s ease;
+  }
+  .section:hover{
+    transform:translateY(-4px);
+    border-color:var(--lav-200);
+    box-shadow:0 26px 54px -22px rgba(36,24,82,.28);
+  }
 
-.section:hover{
-    transform:translateY(-5px);
-    border-color:#60a5fa;
-    box-shadow:0 15px 40px rgba(0,0,0,.25);
-}
+  .step-tag{
+    position:absolute;
+    top:-13px;
+    left:26px;
+    font-family:'Sora',sans-serif;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.06em;
+    color:#fff;
+    padding:6px 14px;
+    border-radius:100px;
+    box-shadow:0 8px 18px -6px rgba(123,97,255,.55);
+  }
+  .step-tag.up{background:linear-gradient(135deg,var(--purple),var(--purple-dark));}
+  .step-tag.down{background:linear-gradient(135deg,#A78BFA,var(--purple-dark));}
 
-.section h2{
+  .section h2{
+    font-family:'Sora',sans-serif;
+    font-size:17px;
+    font-weight:700;
     margin-bottom:18px;
-    font-size:20px;
-    font-weight:600;
-}
-
-input[type=file]{
-    width:100%;
-    padding:14px;
-    border-radius:14px;
-    border:2px dashed rgba(255,255,255,.25);
-    background:rgba(255,255,255,.05);
-    color:#fff;
-    cursor:pointer;
-    margin-bottom:18px;
-    transition:.3s;
-}
-
-input[type=file]:hover{
-    border-color:#60a5fa;
-    background:rgba(255,255,255,.09);
-}
-
-input[type=file]::file-selector-button{
-    border:none;
-    padding:10px 18px;
-    border-radius:10px;
-    background:linear-gradient(135deg,#8b5cf6,#2563eb);
-    color:#fff;
-    cursor:pointer;
-    margin-right:15px;
-    transition:.3s;
-}
-
-input[type=file]::file-selector-button:hover{
-    transform:scale(1.05);
-}
-
-button{
-    width:100%;
-    border:none;
-    border-radius:14px;
-    padding:16px;
-    font-size:16px;
-    font-weight:600;
-    color:#fff;
-    cursor:pointer;
-    background:linear-gradient(135deg,var(--btn1),var(--btn2));
-    transition:.3s;
-}
-
-button:hover:not(:disabled){
-    transform:translateY(-3px);
-    box-shadow:0 15px 30px rgba(37,99,235,.35);
-}
-
-button:active{
-    transform:scale(.98);
-}
-
-button:disabled{
-    opacity:.4;
-    cursor:not-allowed;
-}
-
-canvas{
-    width:100%;
-    max-height:420px;
-    object-fit:contain;
-    display:none;
-    margin-top:20px;
-    border-radius:18px;
-    background:#fff;
-    border:1px solid rgba(255,255,255,.15);
-    box-shadow:0 10px 30px rgba(0,0,0,.25);
-}
-
-.status{
-    margin-top:16px;
-    padding:12px 16px;
-    border-radius:12px;
-    background:rgba(34,197,94,.15);
-    color:#bbf7d0;
-    font-size:14px;
-    word-break:break-word;
-    min-height:46px;
     display:flex;
     align-items:center;
-}
+    gap:10px;
+  }
+  .section h2 .ic{
+    width:30px;height:30px;
+    border-radius:9px;
+    background:var(--lav-100);
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+  }
 
-.section:first-of-type{
+  /* drop-zone style file input */
+  .drop{
+    display:block;
     position:relative;
-}
-
-.section:first-of-type::before{
-    content:"⬆ Upload Image";
+    border:2px dashed var(--lav-200);
+    border-radius:16px;
+    background:var(--lav-bg);
+    padding:26px 16px;
+    text-align:center;
+    margin-bottom:18px;
+    cursor:pointer;
+    transition:border-color .25s ease, background .25s ease, transform .2s ease;
+  }
+  .drop:hover{
+    border-color:var(--purple);
+    background:var(--lav-100);
+  }
+  .drop.drag-over{
+    border-color:var(--purple);
+    background:var(--lav-100);
+    transform:scale(1.015);
+  }
+  .drop input[type=file]{
     position:absolute;
-    top:-12px;
-    right:20px;
-    background:#2563eb;
-    color:#fff;
-    font-size:12px;
-    padding:6px 12px;
-    border-radius:50px;
-}
+    inset:0;
+    opacity:0;
+    cursor:pointer;
+    width:100%;
+    height:100%;
+  }
+  .drop .drop-icon{
+    width:38px;height:38px;
+    margin:0 auto 10px;
+    border-radius:11px;
+    background:var(--white);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 8px 18px -8px rgba(36,24,82,.25);
+    transition:transform .3s cubic-bezier(.34,1.56,.64,1);
+  }
+  .drop:hover .drop-icon, .drop.drag-over .drop-icon{
+    transform:translateY(-3px) scale(1.06);
+  }
+  .drop .drop-title{
+    font-family:'Sora',sans-serif;
+    font-weight:600;
+    font-size:13.5px;
+    margin-bottom:3px;
+  }
+  .drop .drop-sub{
+    font-size:11.5px;
+    color:var(--sub);
+  }
+  .drop .drop-sub b{color:var(--purple-dark);}
 
-.section:last-of-type{
+  button{
+    width:100%;
+    border:none;
+    border-radius:14px;
+    padding:15px;
+    font-family:'Sora',sans-serif;
+    font-size:14.5px;
+    font-weight:600;
+    color:#fff;
+    cursor:pointer;
+    background:linear-gradient(135deg,var(--purple),var(--purple-dark));
+    box-shadow:0 14px 26px -10px rgba(123,97,255,.55);
+    transition:transform .25s cubic-bezier(.34,1.56,.64,1), box-shadow .25s ease, opacity .25s ease;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
     position:relative;
-}
-
-.section:last-of-type::before{
-    content:"⬇ Upload JSON";
+    overflow:hidden;
+  }
+  button::after{
+    content:"";
     position:absolute;
-    top:-12px;
-    right:20px;
-    background:#7c3aed;
-    color:#fff;
-    font-size:12px;
-    padding:6px 12px;
-    border-radius:50px;
-}
+    inset:0;
+    background:linear-gradient(120deg, transparent, rgba(255,255,255,.35), transparent);
+    transform:translateX(-120%);
+  }
+  button:hover:not(:disabled)::after{
+    animation:sheen .9s ease forwards;
+  }
+  @keyframes sheen{ to{ transform:translateX(120%); } }
 
-@media(max-width:768px){
+  button:hover:not(:disabled){
+    transform:translateY(-3px);
+    box-shadow:0 20px 34px -10px rgba(123,97,255,.6);
+  }
+  button:active:not(:disabled){
+    transform:translateY(-1px) scale(.98);
+  }
+  button:disabled{
+    opacity:.4;
+    cursor:not-allowed;
+    box-shadow:none;
+  }
+  button.loading{
+    pointer-events:none;
+  }
+  .spinner{
+    width:15px;height:15px;
+    border-radius:50%;
+    border:2px solid rgba(255,255,255,.4);
+    border-top-color:#fff;
+    display:none;
+    animation:spin .7s linear infinite;
+  }
+  button.loading .spinner{display:inline-block;}
+  button.loading .btn-label{display:none;}
+  @keyframes spin{ to{ transform:rotate(360deg); } }
 
-.card{
-    padding:20px;
-}
+  canvas{
+    width:100%;
+    max-height:340px;
+    object-fit:contain;
+    display:none;
+    margin-top:18px;
+    border-radius:16px;
+    background:#fff;
+    border:1px solid var(--line);
+    box-shadow:0 14px 30px -16px rgba(36,24,82,.25);
+    opacity:0;
+    transform:scale(.97);
+    transition:opacity .5s cubic-bezier(.16,1,.3,1), transform .5s cubic-bezier(.16,1,.3,1);
+  }
+  canvas.show{
+    display:block;
+    opacity:1;
+    transform:scale(1);
+  }
 
-h1{
-    font-size:26px;
-}
-
-.section{
-    padding:18px;
-}
-
-.section h2{
-    font-size:18px;
-}
-
-button{
-    font-size:15px;
-    padding:14px;
-}
-
-.status{
+  .status{
+    margin-top:16px;
+    padding:13px 16px;
+    border-radius:13px;
+    background:var(--lav-bg);
+    color:var(--sub);
     font-size:13px;
-}
+    font-weight:500;
+    min-height:20px;
+    display:flex;
+    align-items:center;
+    gap:9px;
+    opacity:0;
+    transform:translateY(-4px);
+    transition:opacity .35s ease, transform .35s ease, background .35s ease, color .35s ease;
+  }
+  .status.visible{opacity:1; transform:translateY(0);}
+  .status.ok{background:var(--success-bg); color:#15803D;}
+  .status.err{background:#FDEDED; color:#B42318;}
+  .status .dot{
+    width:7px;height:7px;
+    border-radius:50%;
+    background:var(--purple);
+    flex-shrink:0;
+  }
+  .status.ok .dot{background:var(--success);}
+  .status.err .dot{background:#EF4444;}
 
-}
+  /* progress bar shown while "building" */
+  .progress{
+    height:4px;
+    width:100%;
+    background:var(--lav-100);
+    border-radius:4px;
+    overflow:hidden;
+    margin-top:14px;
+    display:none;
+  }
+  .progress.show{display:block;}
+  .progress-bar{
+    height:100%;
+    width:30%;
+    border-radius:4px;
+    background:linear-gradient(90deg,var(--purple),var(--purple-dark));
+    animation:loadbar 1s ease-in-out infinite;
+  }
+  @keyframes loadbar{
+    0%{transform:translateX(-100%);}
+    100%{transform:translateX(340%);}
+  }
+
+  @media(max-width:640px){
+    h1{font-size:26px;}
+    .section{padding:20px;}
+  }
+
+  /* ===================== LOADER ===================== */
+  #loader{
+    position:fixed;
+    inset:0;
+    z-index:50;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:22px;
+    background:linear-gradient(160deg,#241852,#5B3FE0 55%,#7B61FF);
+    transition:opacity .55s ease, visibility .55s ease;
+  }
+  #loader.hide{
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+  }
+  .pixel-grid{
+    display:grid;
+    grid-template-columns:repeat(6,16px);
+    grid-template-rows:repeat(6,16px);
+    gap:5px;
+  }
+  .pixel-grid span{
+    width:16px;height:16px;
+    border-radius:4px;
+    background:rgba(255,255,255,.9);
+    animation:pixelPulse 1.1s ease-in-out infinite;
+  }
+  @keyframes pixelPulse{
+    0%,100%{opacity:.18; transform:scale(.7);}
+    50%{opacity:1; transform:scale(1);}
+  }
+  .loader-label{
+    font-family:'Sora',sans-serif;
+    font-weight:600;
+    font-size:13px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:#fff;
+    opacity:.85;
+  }
+  .loader-label .dots-anim::after{
+    content:"";
+    animation:dotsCycle 1.2s steps(4) infinite;
+  }
+  @keyframes dotsCycle{
+    0%{content:"";}
+    25%{content:".";}
+    50%{content:"..";}
+    75%{content:"...";}
+    100%{content:"";}
+  }
 </style>
 </head>
 <body>
-<div class="card">
-  <h1>🎨 Pixel ⇄ JSON Converter</h1>
-  <p class="sub">Turn any image into a pixel JSON file, or rebuild a PNG from one.</p>
+
+<div id="loader">
+  <div class="pixel-grid" id="pixelGrid"></div>
+  <div class="loader-label">Loading converter<span class="dots-anim"></span></div>
+</div>
+
+<div class="blob blob-a"></div>
+<div class="blob blob-b"></div>
+<div class="blob blob-c"></div>
+
+<div class="wrap">
+  <div class="eyebrow">Pixel utility</div>
+  <h1>Pixel <span>⇄</span> JSON converter</h1>
+  <p class="sub">Turn any image into a pixel-level JSON file, or rebuild a PNG from one. Everything runs locally in your browser.</p>
 
   <div class="section">
-    <h2>1. Image → Pixel JSON</h2>
-    <input type="file" id="imgInput" accept="image/*">
-    <button id="convertBtn" disabled>Convert & Download JSON</button>
+    <div class="step-tag up">STEP 1 · IMAGE → JSON</div>
+    <h2>
+      <span class="ic">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#5B3FE0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+      </span>
+      Image → Pixel JSON
+    </h2>
+
+    <label class="drop" id="dropZoneImg">
+      <div class="drop-icon">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7B61FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 19h16"/></svg>
+      </div>
+      <div class="drop-title">Drop an image, or click to browse</div>
+      <div class="drop-sub">PNG · JPG · WEBP — converted to <b>pixel arrays</b></div>
+      <input type="file" id="imgInput" accept="image/*">
+    </label>
+
+    <button id="convertBtn" disabled>
+      <div class="spinner"></div>
+      <span class="btn-label">Convert & download JSON</span>
+    </button>
+
+    <div class="progress" id="imgProgress"><div class="progress-bar"></div></div>
     <canvas id="previewCanvas"></canvas>
-    <div class="status" id="imgStatus"></div>
+    <div class="status" id="imgStatus"><span class="dot"></span><span class="msg">Waiting for an image…</span></div>
   </div>
 
   <div class="section">
-    <h2>2. Pixel JSON → PNG</h2>
-    <input type="file" id="jsonInput" accept="application/json">
-    <button id="rebuildBtn" disabled>Rebuild & Download PNG</button>
+    <div class="step-tag down">STEP 2 · JSON → PNG</div>
+    <h2>
+      <span class="ic">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#5B3FE0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+      </span>
+      Pixel JSON → PNG
+    </h2>
+
+    <label class="drop" id="dropZoneJson">
+      <div class="drop-icon">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7B61FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9"/><path d="M7 14l5-5 5 5"/><path d="M4 5h16"/></svg>
+      </div>
+      <div class="drop-title">Drop a pixel .json file, or click to browse</div>
+      <div class="drop-sub">Rebuilds a full-resolution <b>PNG image</b></div>
+      <input type="file" id="jsonInput" accept="application/json">
+    </label>
+
+    <button id="rebuildBtn" disabled>
+      <div class="spinner"></div>
+      <span class="btn-label">Rebuild & download PNG</span>
+    </button>
+
+    <div class="progress" id="jsonProgress"><div class="progress-bar"></div></div>
     <canvas id="rebuildCanvas"></canvas>
-    <div class="status" id="jsonStatus"></div>
+    <div class="status" id="jsonStatus"><span class="dot"></span><span class="msg">Waiting for a JSON file…</span></div>
   </div>
 </div>
 
 <script>
+// build the staggered pixel-grid loader animation
+const pixelGrid = document.getElementById('pixelGrid');
+for (let i = 0; i < 36; i++) {
+  const sq = document.createElement('span');
+  sq.style.animationDelay = (Math.random() * 1.1).toFixed(2) + 's';
+  pixelGrid.appendChild(sq);
+}
+
+function hideLoader(){
+  const loader = document.getElementById('loader');
+  if (loader) loader.classList.add('hide');
+}
+// hide once everything (fonts etc.) has loaded, with a small minimum so the animation is visible,
+// and a hard fallback in case 'load' is delayed or blocked.
+let loaderDone = false;
+window.addEventListener('load', () => {
+  setTimeout(() => { loaderDone = true; hideLoader(); }, 900);
+});
+setTimeout(() => { if(!loaderDone) hideLoader(); }, 3000);
+
 const imgInput = document.getElementById('imgInput');
 const convertBtn = document.getElementById('convertBtn');
 const previewCanvas = document.getElementById('previewCanvas');
 const imgStatus = document.getElementById('imgStatus');
+const imgStatusMsg = imgStatus.querySelector('.msg');
+const dropZoneImg = document.getElementById('dropZoneImg');
+const imgProgress = document.getElementById('imgProgress');
 
 const jsonInput = document.getElementById('jsonInput');
 const rebuildBtn = document.getElementById('rebuildBtn');
 const rebuildCanvas = document.getElementById('rebuildCanvas');
 const jsonStatus = document.getElementById('jsonStatus');
+const jsonStatusMsg = jsonStatus.querySelector('.msg');
+const dropZoneJson = document.getElementById('dropZoneJson');
+const jsonProgress = document.getElementById('jsonProgress');
 
 let currentImageData = null;
 let currentFileName = 'image';
+
+function setStatus(el, msgEl, text, kind){
+  msgEl.textContent = text;
+  el.classList.remove('ok','err');
+  if(kind) el.classList.add(kind);
+  el.classList.add('visible');
+}
+
+// drag & drop visuals
+[[dropZoneImg, imgInput], [dropZoneJson, jsonInput]].forEach(([zone, input]) => {
+  ['dragenter','dragover'].forEach(evt => zone.addEventListener(evt, e => {
+    e.preventDefault();
+    zone.classList.add('drag-over');
+  }));
+  ['dragleave','drop'].forEach(evt => zone.addEventListener(evt, e => {
+    e.preventDefault();
+    zone.classList.remove('drag-over');
+  }));
+  zone.addEventListener('drop', e => {
+    if(e.dataTransfer.files.length){
+      input.files = e.dataTransfer.files;
+      input.dispatchEvent(new Event('change'));
+    }
+  });
+});
 
 imgInput.addEventListener('change', () => {
   const file = imgInput.files[0];
   if (!file) return;
   currentFileName = file.name.replace(/\.[^/.]+$/, '');
+  setStatus(imgStatus, imgStatusMsg, 'Loading image…', null);
   const img = new Image();
   img.onload = () => {
     previewCanvas.width = img.width;
     previewCanvas.height = img.height;
-    previewCanvas.style.display = 'block';
     const ctx = previewCanvas.getContext('2d');
     ctx.drawImage(img, 0, 0);
     currentImageData = ctx.getImageData(0, 0, img.width, img.height);
-    imgStatus.textContent = `Loaded ${img.width}×${img.height} px image. Ready to convert.`;
+    previewCanvas.classList.add('show');
+    setStatus(imgStatus, imgStatusMsg, `Loaded ${img.width}×${img.height}px — ready to convert.`, 'ok');
     convertBtn.disabled = false;
   };
   img.src = URL.createObjectURL(file);
@@ -287,27 +568,35 @@ imgInput.addEventListener('change', () => {
 
 convertBtn.addEventListener('click', () => {
   if (!currentImageData) return;
-  imgStatus.textContent = 'Building JSON...';
-  const { width, height, data } = currentImageData;
-  const pixels = [];
-  for (let i = 0; i < data.length; i += 4) {
-    pixels.push([data[i], data[i+1], data[i+2], data[i+3]]);
-  }
-  const payload = { width, height, pixels };
-  const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `${currentFileName}-pixels.json`;
-  a.click();
-  URL.revokeObjectURL(url);
-  imgStatus.textContent = `Done! Downloaded ${width * height} pixels.`;
+  convertBtn.classList.add('loading');
+  imgProgress.classList.add('show');
+  setStatus(imgStatus, imgStatusMsg, 'Building JSON…', null);
+
+  setTimeout(() => {
+    const { width, height, data } = currentImageData;
+    const pixels = [];
+    for (let i = 0; i < data.length; i += 4) {
+      pixels.push([data[i], data[i+1], data[i+2], data[i+3]]);
+    }
+    const payload = { width, height, pixels };
+    const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${currentFileName}-pixels.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    convertBtn.classList.remove('loading');
+    imgProgress.classList.remove('show');
+    setStatus(imgStatus, imgStatusMsg, `Done — downloaded ${width * height} pixels.`, 'ok');
+  }, 350);
 });
 
 jsonInput.addEventListener('change', () => {
   const file = jsonInput.files[0];
   if (!file) return;
-  jsonStatus.textContent = 'Reading JSON...';
+  setStatus(jsonStatus, jsonStatusMsg, 'Reading JSON…', null);
   const reader = new FileReader();
   reader.onload = (e) => {
     try {
@@ -316,10 +605,10 @@ jsonInput.addEventListener('change', () => {
         throw new Error('Invalid pixel JSON format');
       }
       window._rebuildData = data;
-      jsonStatus.textContent = `Loaded ${data.width}×${data.height} px data. Ready to rebuild.`;
+      setStatus(jsonStatus, jsonStatusMsg, `Loaded ${data.width}×${data.height}px data — ready to rebuild.`, 'ok');
       rebuildBtn.disabled = false;
     } catch (err) {
-      jsonStatus.textContent = 'Error: ' + err.message;
+      setStatus(jsonStatus, jsonStatusMsg, 'Error: ' + err.message, 'err');
       rebuildBtn.disabled = true;
     }
   };
@@ -329,30 +618,39 @@ jsonInput.addEventListener('change', () => {
 rebuildBtn.addEventListener('click', () => {
   const data = window._rebuildData;
   if (!data) return;
-  jsonStatus.textContent = 'Rebuilding image...';
-  const { width, height, pixels } = data;
-  rebuildCanvas.width = width;
-  rebuildCanvas.height = height;
-  rebuildCanvas.style.display = 'block';
-  const ctx = rebuildCanvas.getContext('2d');
-  const imageData = ctx.createImageData(width, height);
-  for (let i = 0; i < pixels.length; i++) {
-    const [r, g, b, a] = pixels[i];
-    imageData.data[i*4] = r;
-    imageData.data[i*4+1] = g;
-    imageData.data[i*4+2] = b;
-    imageData.data[i*4+3] = a;
-  }
-  ctx.putImageData(imageData, 0, 0);
-  rebuildCanvas.toBlob((blob) => {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'rebuilt-image.png';
-    a.click();
-    URL.revokeObjectURL(url);
-    jsonStatus.textContent = 'Done! PNG downloaded.';
-  }, 'image/png');
+  rebuildBtn.classList.add('loading');
+  jsonProgress.classList.add('show');
+  setStatus(jsonStatus, jsonStatusMsg, 'Rebuilding image…', null);
+
+  setTimeout(() => {
+    const { width, height, pixels } = data;
+    rebuildCanvas.width = width;
+    rebuildCanvas.height = height;
+    const ctx = rebuildCanvas.getContext('2d');
+    const imageData = ctx.createImageData(width, height);
+    for (let i = 0; i < pixels.length; i++) {
+      const [r, g, b, a] = pixels[i];
+      imageData.data[i*4] = r;
+      imageData.data[i*4+1] = g;
+      imageData.data[i*4+2] = b;
+      imageData.data[i*4+3] = a;
+    }
+    ctx.putImageData(imageData, 0, 0);
+    rebuildCanvas.classList.add('show');
+
+    rebuildCanvas.toBlob((blob) => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'rebuilt-image.png';
+      a.click();
+      URL.revokeObjectURL(url);
+
+      rebuildBtn.classList.remove('loading');
+      jsonProgress.classList.remove('show');
+      setStatus(jsonStatus, jsonStatusMsg, 'Done — PNG downloaded.', 'ok');
+    }, 'image/png');
+  }, 350);
 });
 </script>
 </body>
